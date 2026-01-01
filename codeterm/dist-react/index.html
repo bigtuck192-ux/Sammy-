@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" class="codemate-ai-dark-theme">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; 
+    style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; 
+    script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.googletagmanager.com; 
+    connect-src 'self' http://127.0.0.1:5000 ws://127.0.0.1:5000 https://www.google-analytics.com https://api.identity.codemate.ai; 
+    img-src 'self' data:;" />
+
+
+  <title>CodeTerm</title>
+
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-93DKE8SRB8"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-93DKE8SRB8");
+  </script>
+
+  <!-- Include React and ReactDOM from CDN -->
+  <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Tailwind CSS CDN for styling -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <script type="module" crossorigin src="./assets/index-Dm3n66-C.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/ace-builds-zox5IqHp.js">
+  <link rel="modulepreload" crossorigin href="./assets/react-BOYD0Eae.js">
+  <link rel="modulepreload" crossorigin href="./assets/scheduler-CzFDRTuY.js">
+  <link rel="modulepreload" crossorigin href="./assets/react-dom-D6QFreEl.js">
+  <link rel="modulepreload" crossorigin href="./assets/react-icons-htnwMEOV.js">
+  <link rel="modulepreload" crossorigin href="./assets/engine.io-parser-BiEtp6m2.js">
+  <link rel="modulepreload" crossorigin href="./assets/@socket.io-Dkula2eQ.js">
+  <link rel="modulepreload" crossorigin href="./assets/engine.io-client-C44f3zIw.js">
+  <link rel="modulepreload" crossorigin href="./assets/socket.io-parser-BBkuslX-.js">
+  <link rel="modulepreload" crossorigin href="./assets/socket.io-client-D2F1JntD.js">
+  <link rel="modulepreload" crossorigin href="./assets/uuid-DvF23Exx.js">
+  <link rel="modulepreload" crossorigin href="./assets/devlop-Cl3hj7Sz.js">
+  <link rel="modulepreload" crossorigin href="./assets/bail-FqpXQuLt.js">
+  <link rel="modulepreload" crossorigin href="./assets/extend-BQXuF5v6.js">
+  <link rel="modulepreload" crossorigin href="./assets/is-plain-obj-C1gvLhAf.js">
+  <link rel="modulepreload" crossorigin href="./assets/trough-B_b8ryxu.js">
+  <link rel="modulepreload" crossorigin href="./assets/unist-util-stringify-position-Ch_qCilz.js">
+  <link rel="modulepreload" crossorigin href="./assets/vfile-message-Bq256rVA.js">
+  <link rel="modulepreload" crossorigin href="./assets/vfile-tbz-BywF.js">
+  <link rel="modulepreload" crossorigin href="./assets/unified-CaLNyFq2.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-util-decode-numeric-character-reference-CNs1qBpV.js">
+  <link rel="modulepreload" crossorigin href="./assets/decode-named-character-reference-C3-224fz.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-util-decode-string-strjl-tx.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-util-normalize-identifier-C9ANKk3v.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-util-chunked-DrRIdSP-.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-util-combine-extensions-Bka6Sc1c.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-util-character-Ch8j4vtg.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-factory-space-CA-Wq7KA.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-util-classify-character-GCpR5yWH.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-util-resolve-all-PQCKh0dx.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-util-subtokenize-Bdv1B1ce.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-factory-destination-CkgxUJuk.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-factory-label-U15tx9Nh.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-factory-title-reCpaPbc.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-factory-whitespace-_v4v79HM.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-util-html-tag-name-DbKNfynz.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-core-commonmark-DGH4vyL8.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-DTlTLvYZ.js">
+  <link rel="modulepreload" crossorigin href="./assets/mdast-util-to-string-C_aolqmU.js">
+  <link rel="modulepreload" crossorigin href="./assets/mdast-util-from-markdown-CeHMh-rK.js">
+  <link rel="modulepreload" crossorigin href="./assets/remark-parse-BrXu98zB.js">
+  <link rel="modulepreload" crossorigin href="./assets/@ungap-DDJC10qW.js">
+  <link rel="modulepreload" crossorigin href="./assets/micromark-util-sanitize-uri-WGc3xW3f.js">
+  <link rel="modulepreload" crossorigin href="./assets/unist-util-position-60F3QETU.js">
+  <link rel="modulepreload" crossorigin href="./assets/trim-lines-D8znQY54.js">
+  <link rel="modulepreload" crossorigin href="./assets/unist-util-is-D9KQvrmg.js">
+  <link rel="modulepreload" crossorigin href="./assets/unist-util-visit-parents-BC5uWo4u.js">
+  <link rel="modulepreload" crossorigin href="./assets/unist-util-visit-DGoE-dKL.js">
+  <link rel="modulepreload" crossorigin href="./assets/mdast-util-to-hast-BfaRxxVW.js">
+  <link rel="modulepreload" crossorigin href="./assets/remark-rehype-1Bk2Q172.js">
+  <link rel="modulepreload" crossorigin href="./assets/comma-separated-tokens-xMQ5YY98.js">
+  <link rel="modulepreload" crossorigin href="./assets/property-information-C2mYTYrW.js">
+  <link rel="modulepreload" crossorigin href="./assets/space-separated-tokens-DD3iYX1K.js">
+  <link rel="modulepreload" crossorigin href="./assets/inline-style-parser-D--Rb2MU.js">
+  <link rel="modulepreload" crossorigin href="./assets/style-to-object-DUIdZ64S.js">
+  <link rel="modulepreload" crossorigin href="./assets/hast-util-whitespace-D4Wp6AEg.js">
+  <link rel="modulepreload" crossorigin href="./assets/estree-util-is-identifier-name-BgBfM8ME.js">
+  <link rel="modulepreload" crossorigin href="./assets/hast-util-to-jsx-runtime-BT3ISMAz.js">
+  <link rel="modulepreload" crossorigin href="./assets/html-url-attributes-D46m5wfe.js">
+  <link rel="modulepreload" crossorigin href="./assets/react-markdown-CZ6Seur3.js">
+  <link rel="modulepreload" crossorigin href="./assets/xtend-CeaPpq3n.js">
+  <link rel="modulepreload" crossorigin href="./assets/hast-util-parse-selector-Cqsfuk9Y.js">
+  <link rel="modulepreload" crossorigin href="./assets/hastscript-CufpaJpy.js">
+  <link rel="modulepreload" crossorigin href="./assets/refractor-DMBKtE-C.js">
+  <link rel="modulepreload" crossorigin href="./assets/@babel-D7QzmyDV.js">
+  <link rel="modulepreload" crossorigin href="./assets/react-syntax-highlighter-BzuSNXZg.js">
+  <link rel="modulepreload" crossorigin href="./assets/entities-CgcPRAwt.js">
+  <link rel="modulepreload" crossorigin href="./assets/ansi-to-html-TIwthtE6.js">
+  <link rel="modulepreload" crossorigin href="./assets/xterm-DQVPUG18.js">
+  <link rel="modulepreload" crossorigin href="./assets/xterm-addon-fit-CECnk2lm.js">
+  <link rel="modulepreload" crossorigin href="./assets/prop-types-BKNjMPK8.js">
+  <link rel="modulepreload" crossorigin href="./assets/lodash.isequal-UfDCfVYe.js">
+  <link rel="modulepreload" crossorigin href="./assets/lodash.get-5suVfKIr.js">
+  <link rel="modulepreload" crossorigin href="./assets/diff-match-patch-CVofqCa5.js">
+  <link rel="modulepreload" crossorigin href="./assets/react-ace-8ncE7_VW.js">
+  <link rel="stylesheet" crossorigin href="./assets/index-DoF3wssI.css">
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <!-- Add your custom JavaScript, this will be compiled with TypeScript in your build process -->
+</body>
+
+</html>
