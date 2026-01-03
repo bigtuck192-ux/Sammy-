@@ -318,7 +318,7 @@ export class AppComponent implements OnDestroy {
   }
 
   // Method to handle view changes, including auth check for profile
-  setViewMode(mode: 'player' | 'dj' | 'piano-roll' | 'image-editor' | 'video-editor' | 'networking' | 'profile' | 'tha-spot'): void {
+  setViewMode(mode: Exclude<MainViewMode, 'login'>): void {
     if (mode === 'profile' && !this.authService.isAuthenticated()) {
       this.mainViewMode.set('login');
     } else {
