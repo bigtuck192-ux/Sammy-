@@ -41,40 +41,7 @@
           </div>
         }
         @case ('dj') {
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <!-- DECK A -->
-            <div class="border p-2 flex flex-col gap-2" [class]="djBorderClass()">
-              <h3 class="text-center" [class]="djTextColorClass()">[ DECK A ]</h3>
-              <div class="bg-black p-2 text-center text-xs truncate">
-                {{ deckA().track.name }}
-              </div>
-              <div class="w-full aspect-square bg-neutral-900 rounded-full flex items-center justify-center">
-                 <img [src]="deckA().track.albumArtUrl" class="w-48 h-48 rounded-full object-cover">
-              </div>
-               <div class="flex justify-center gap-2">
-                 <button class="p-2 border text-xl" >
-                    @if (deckA().isPlaying) { <span>[ PAUSE ]</span> } @else { <span>[ PLAY ]</span> }
-                  </button>
-                  <button class="p-2 border">[ CUE ]</button>
-               </div>
-            </div>
-            <!-- DECK B -->
-             <div class="border p-2 flex flex-col gap-2" [class]="djBorderClass()">
-              <h3 class="text-center" [class]="djTextColorClass()">[ DECK B ]</h3>
-              <div class="bg-black p-2 text-center text-xs truncate">
-                {{ deckB().track.name }}
-              </div>
-              <div class="w-full aspect-square bg-neutral-900 rounded-full flex items-center justify-center">
-                 <img [src]="deckB().track.albumArtUrl" class="w-48 h-48 rounded-full object-cover">
-              </div>
-               <div class="flex justify-center gap-2">
-                 <button class="p-2 border text-xl">
-                    @if (deckB().isPlaying) { <span>[ PAUSE ]</span> } @else { <span>[ PLAY ]</span> }
-                  </button>
-                  <button class="p-2 border">[ CUE ]</button>
-               </div>
-            </div>
-          </div>
+          <app-dj-deck [theme]="currentTheme()"></app-dj-deck>
         }
         @case ('piano-roll') { <app-piano-roll [theme]="currentTheme()"></app-piano-roll> }
         @case ('image-editor') { <app-image-editor [theme]="currentTheme()" [initialPrompt]="imageEditorInitialPrompt()" (imageSelected)="handleImageSelectedForAlbumArt($event)" (imageAnalysisRequest)="handleChatbotCommand({ action: 'ANALYZE_IMAGE', parameters: { imageUrl: $event }})" (imageGenerated)="handleImageGenerated($event)"></app-image-editor> }
