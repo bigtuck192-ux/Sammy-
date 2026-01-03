@@ -13,6 +13,8 @@ import { NetworkingComponent, ArtistProfile, MOCK_ARTISTS } from '../components/
 import { ProfileEditorComponent } from '../components/profile-editor/profile-editor.component';
 import { HubComponent } from '../../app/hub/hub';
 import { AiService } from '../services/ai.service';
+import { AuthService } from '../services/auth.service';
+import { LoginComponent } from '../components/login/login.component';
 // FIX: Import AppTheme and shared types from UserContextService to break circular dependency which caused injection errors.
 import { UserContextService, AppTheme, Track, EqBand, Enhancements, DeckState, initialDeckState } from '../services/user-context.service';
 import { UserProfileService } from '../services/user-profile.service';
@@ -33,7 +35,7 @@ const THEMES: AppTheme[] = [
   standalone: true,
   templateUrl: './app.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, EqPanelComponent, MatrixBackgroundComponent, ChatbotComponent, ImageEditorComponent, VideoEditorComponent, AudioVisualizerComponent, PianoRollComponent, NetworkingComponent, ProfileEditorComponent, HubComponent],
+  imports: [CommonModule, FormsModule, EqPanelComponent, MatrixBackgroundComponent, ChatbotComponent, ImageEditorComponent, VideoEditorComponent, AudioVisualizerComponent, PianoRollComponent, NetworkingComponent, ProfileEditorComponent, HubComponent, LoginComponent],
   host: {
     '(window:mousemove)': 'onScratch($event)', '(window:touchmove)': 'onScratch($event)',
     '(window:mouseup)': 'onScratchEnd()', '(window:touchend)': 'onScratchEnd()',
@@ -49,7 +51,7 @@ export class AppComponent implements OnDestroy {
   videoPlayerBRef = viewChild<ElementRef<HTMLVideoElement>>('videoPlayerB');
   fileInputRef = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 
-  mainViewMode = signal<'player' | 'dj' | 'piano-roll' | 'image-editor' | 'video-editor' | 'networking' | 'profile' | 'tha-spot'>('player');
+  mainViewMode = signal<'player' | 'dj' | 'piano-roll' | 'image-editor' | 'video-editor' | 'networking' | 'profile' | 'tha-spot' | 'login'>('login');
   showChatbot = signal(true);
 
   // --- Player State ---
@@ -116,15 +118,27 @@ export class AppComponent implements OnDestroy {
   private analyserMaster!: AnalyserNode;
   private gainNodeMaster!: GainNode;
   private destinationNode!: MediaStreamAudioDestinationNode;
-  private vuIntervalId?: number;
+  private vuAnalysisFrameId?: number;
   private aiService = inject(AiService);
   // FIX: userContext is now correctly typed as UserContextService, fixing the errors on property access.
   private userContext = inject(UserContextService);
   private userProfileService = inject(UserProfileService); // Initialize profile service
+  authService = inject(AuthService);
 
   constructor() {
     this.initAudioContext();
     this.initVUAnalysis();
+
+    // Redirect to login if not authenticated
+    effect(() => {
+      if (!this.authService.isAuthenticated()) {
+        this.mainViewMode.set('login');
+      } else if (this.mainViewMode() === 'login') {
+        // If logged in and on login screen, go to player
+        this.mainViewMode.set('player');
+      }
+    }, { allowSignalWrites: true });
+
     effect(() => { if (this.imageAnalysisResult()) this.showImageAnalysisModal.set(true); });
     effect(() => { if (this.mapLocationResult()) this.showMapResultsModal.set(true); });
     effect(() => { if (this.selectedArtistProfile()) this.showArtistDetailModal.set(true); });
@@ -149,7 +163,7 @@ export class AppComponent implements OnDestroy {
   ngOnDestroy(): void {
     this.stopAllAudio();
     this.audioContext?.close();
-    if (this.vuIntervalId) clearInterval(this.vuIntervalId);
+    if (this.vuAnalysisFrameId) cancelAnimationFrame(this.vuAnalysisFrameId);
   }
 
   private initAudioContext(): void {
@@ -168,15 +182,18 @@ export class AppComponent implements OnDestroy {
 
   private initVUAnalysis(): void {
     if (typeof window !== 'undefined') {
-      this.vuIntervalId = window.setInterval(() => {
-        if (this.analyserMaster) {
+      const analyze = () => {
+        // Only run analysis if the DJ deck is visible for performance
+        if (this.mainViewMode() === 'dj' && this.analyserMaster) {
           const bufferLength = this.analyserMaster.frequencyBinCount;
           const dataArray = new Uint8Array(bufferLength);
           this.analyserMaster.getByteFrequencyData(dataArray);
           const average = dataArray.reduce((acc, val) => acc + val, 0) / bufferLength;
           this.vuLevelMaster.set(Math.min(100, (average / 128) * 100));
         }
-      }, 100);
+        this.vuAnalysisFrameId = requestAnimationFrame(analyze);
+      };
+      analyze();
     }
   }
   
@@ -298,5 +315,14 @@ export class AppComponent implements OnDestroy {
       nextIndex = Math.floor(Math.random() * this.THEMES.length);
     } while (nextIndex === currentIndex);
     this.currentTheme.set(this.THEMES[nextIndex]);
+  }
+
+  // Method to handle view changes, including auth check for profile
+  setViewMode(mode: 'player' | 'dj' | 'piano-roll' | 'image-editor' | 'video-editor' | 'networking' | 'profile' | 'tha-spot'): void {
+    if (mode === 'profile' && !this.authService.isAuthenticated()) {
+      this.mainViewMode.set('login');
+    } else {
+      this.mainViewMode.set(mode);
+    }
   }
 }

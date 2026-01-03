@@ -1,6 +1,6 @@
 
 <div class="w-full p-4 flex flex-col gap-4 relative h-full" [class]="'text-' + theme().neutral + '-200'" [class]="'border border-' + theme().accent + '-500/30'">
-  <h2 class="text-center text-lg" [class]="'text-' + theme().accent + '-400'">[ AURA VIDEO LAB ]</h2>
+  <h2 class="text-center text-lg" [class]="'text-' + theme().accent + '-400'">[ S.M.U.V.E. VIDEO LAB ]</h2>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow h-full">
     <!-- Left Panel: Controls & Input -->
@@ -15,8 +15,8 @@
       <!-- Settings -->
       <div class="flex gap-2 items-center">
          <span class="text-sm">[ ASPECT ]</span>
-         <button (click)="aspectRatio.set('16:9')" class="p-1 px-3 border text-xs" [class.bg-white]="aspectRatio() === '16:9'" [class.text-black]="aspectRatio() === '16:9'">16:9</button>
-         <button (click)="aspectRatio.set('9:16')" class="p-1 px-3 border text-xs" [class.bg-white]="aspectRatio() === '9:16'" [class.text-black]="aspectRatio() === '9:16'">9:16</button>
+         <button (click)="aspectRatio.set('16:9')" class="p-1 px-3 border text-xs transition-colors duration-200" [class.bg-white]="aspectRatio() === '16:9'" [class.text-black]="aspectRatio() === '16:9'">16:9</button>
+         <button (click)="aspectRatio.set('9:16')" class="p-1 px-3 border text-xs transition-colors duration-200" [class.bg-white]="aspectRatio() === '9:16'" [class.text-black]="aspectRatio() === '9:16'">9:16</button>
       </div>
 
       <!-- Actions -->
