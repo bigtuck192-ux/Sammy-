@@ -22,9 +22,9 @@ export class ProfileEditorComponent {
   readonly ALL_SKILLS = ['Vocalist', 'Producer', 'Songwriter', 'DJ', 'Guitarist', 'Bassist', 'Drummer', 'Keyboardist', 'Sound Designer'];
   readonly ALL_GOALS = ['Get Signed', 'Grow Fanbase', 'License Music', 'Tour', 'Collaborate', 'Improve Skills'];
   
-  readonly socialPlatforms = ['Facebook', 'Twitter', 'Instagram', 'TikTok', 'Threads'];
-  readonly musicPlatforms = ['Spotify', 'Apple Music', 'SoundCloud', 'YouTube', 'Bandcamp', 'Tidal', 'iHeartRadio'];
-  readonly proPlatforms = ['ASCAP', 'BMI', 'SESAC', 'SoundExchange', 'The MLC', 'AllTrack'];
+  readonly socialPlatforms = ['X', 'Instagram', 'TikTok', 'Facebook', 'YouTube', 'Twitch', 'Discord', 'Reddit', 'Snapchat'];
+  readonly musicPlatforms = ['Spotify for Artists', 'Apple Music for Artists', 'SoundCloud', 'Bandcamp', 'Tidal for Artists', 'Amazon Music for Artists', 'YouTube Official Artist Channel', 'iHeartRadio for Artists'];
+  readonly proPlatforms = ['ASCAP', 'BMI', 'SESAC', 'DistroKid', 'TuneCore', 'CD Baby', 'Vydia'];
 
   saveProfile(): void {
     this.saveStatus.set('saving');
