@@ -23,6 +23,7 @@ declare global {
   interface HTMLAudioElement { __sourceNode?: MediaElementAudioSourceNode; }
 }
 
+type MainViewMode = 'player' | 'dj' | 'piano-roll' | 'image-editor' | 'video-editor' | 'networking' | 'profile' | 'tha-spot' | 'login';
 type ScratchState = { active: boolean; lastAngle: number; platterElement: HTMLElement | null; };
 const THEMES: AppTheme[] = [
   { name: 'Green Vintage', primary: 'green', accent: 'amber', neutral: 'neutral', purple: 'purple', red: 'red', blue: 'blue' },
@@ -51,7 +52,7 @@ export class AppComponent implements OnDestroy {
   videoPlayerBRef = viewChild<ElementRef<HTMLVideoElement>>('videoPlayerB');
   fileInputRef = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 
-  mainViewMode = signal<'player' | 'dj' | 'piano-roll' | 'image-editor' | 'video-editor' | 'networking' | 'profile' | 'tha-spot' | 'login'>('login');
+  mainViewMode = signal<MainViewMode>('login');
   showChatbot = signal(true);
 
   // --- Player State ---
