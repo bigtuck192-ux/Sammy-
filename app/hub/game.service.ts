@@ -7,11 +7,11 @@ import { Game } from './game';
 })
 export class GameService {
   private defaultGames: Game[] = [
-    { id: 1, name: 'BasketBros', url: 'https://www.basketballlegends.fun/', image: 'https://i.ytimg.com/vi/b-33-32-a-A/maxresdefault.jpg' },
-    { id: 2, name: 'FootballTeam', url: 'https://footballteamgame.com/', image: 'https://cdn.footballteamgame.com/img/share-v1.jpg' },
-    { id: 3, name: 'Online Boxing Manager', url: 'https://www.onlineboxingmanager.com/', image: 'https://www.onlineboxingmanager.com/images/og.jpg' },
-    { id: 4, name: 'Eliatopia', url: 'https://eliatopia.com/', image: 'https://i.ytimg.com/vi/YwE6-zw-T-g/maxresdefault.jpg' },
-    { id: 5, name: 'War Lands', url: 'https://www.crazygames.com/game/war-lands', image: 'https://images.crazygames.com/games/war-lands/cover-1614945376395.png' },
+    { id: 1, name: 'HexGL', url: 'https://hexgl.bkcore.com/', image: 'https://i.ytimg.com/vi/126JgG24n-A/maxresdefault.jpg' },
+    { id: 2, name: 'Pacman', url: 'https://mumuy.github.io/pacman/', image: 'https://mumuy.github.io/pacman/res/cover.png' },
+    { id: 3, name: 'Ancient Beast', url: 'https://freezingmoon.github.io/AncientBeast/', image: 'https://freezingmoon.github.io/AncientBeast/screenshots/ss1.png' },
+    { id: 4, name: '2048', url: 'https://gd4ark.github.io/2048/', image: 'https://www.2048-online.com/images/2048-logo.png' },
+    { id: 5, name: 'Jump-n-Bump', url: 'https://ennorehling.github.io/jump-n-bump/', image: 'https://raw.githubusercontent.com/ennorehling/jump-n-bump/main/assets/menu/thumbnail.png' },
   ];
 
   games = signal<Game[]>([...this.defaultGames]);
