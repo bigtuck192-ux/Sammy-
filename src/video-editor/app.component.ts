@@ -23,6 +23,7 @@ declare global {
   interface HTMLAudioElement { __sourceNode?: MediaElementAudioSourceNode; }
 }
 
+type MainViewMode = 'player' | 'dj' | 'piano-roll' | 'image-editor' | 'video-editor' | 'networking' | 'profile' | 'tha-spot' | 'login';
 type ScratchState = { active: boolean; lastAngle: number; platterElement: HTMLElement | null; };
 const THEMES: AppTheme[] = [
   { name: 'Green Vintage', primary: 'green', accent: 'amber', neutral: 'neutral', purple: 'purple', red: 'red', blue: 'blue' },
@@ -126,6 +127,13 @@ export class AppComponent implements OnDestroy {
   authService = inject(AuthService);
 
   constructor() {
+    // Set initial view mode based on authentication
+    if (!this.authService.isAuthenticated()) {
+      this.mainViewMode.set('login');
+    } else {
+      this.mainViewMode.set('player');
+    }
+
     this.initAudioContext();
     this.initVUAnalysis();
 
