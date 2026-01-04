@@ -3,7 +3,6 @@ import { Component, ChangeDetectionStrategy, signal, ElementRef, viewChild, effe
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EqPanelComponent } from '../components/eq-panel/eq-panel.component';
-import { MatrixBackgroundComponent } from '../components/sample-library/matrix-background.component';
 import { ChatbotComponent } from '../chatbot/chatbot.component';
 import { ImageEditorComponent } from '../components/image-editor/image-editor.component';
 import { VideoEditorComponent } from './video-editor.component';
@@ -23,11 +22,12 @@ declare global {
   interface HTMLAudioElement { __sourceNode?: MediaElementAudioSourceNode; }
 }
 
+type MainViewMode = 'player' | 'dj' | 'piano-roll' | 'image-editor' | 'video-editor' | 'networking' | 'profile' | 'tha-spot' | 'login';
 type ScratchState = { active: boolean; lastAngle: number; platterElement: HTMLElement | null; };
 const THEMES: AppTheme[] = [
-  { name: 'Green Vintage', primary: 'green', accent: 'amber', neutral: 'neutral', purple: 'purple', red: 'red', blue: 'blue' },
-  { name: 'Blue Retro', primary: 'blue', accent: 'fuchsia', neutral: 'zinc', purple: 'purple', red: 'red', blue: 'blue' },
-  { name: 'Red Glitch', primary: 'red', accent: 'cyan', neutral: 'stone', purple: 'purple', red: 'red', blue: 'blue' },
+  { name: 'Dusk', primary: 'indigo', accent: 'rose', neutral: 'slate', purple: 'purple', red: 'red', blue: 'blue' },
+  { name: 'Dawn', primary: 'sky', accent: 'amber', neutral: 'stone', purple: 'purple', red: 'red', blue: 'blue' },
+  { name: 'Oceanic', primary: 'teal', accent: 'lime', neutral: 'zinc', purple: 'purple', red: 'red', blue: 'blue' },
 ];
 
 @Component({
@@ -35,7 +35,7 @@ const THEMES: AppTheme[] = [
   standalone: true,
   templateUrl: './app.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, EqPanelComponent, MatrixBackgroundComponent, ChatbotComponent, ImageEditorComponent, VideoEditorComponent, AudioVisualizerComponent, PianoRollComponent, NetworkingComponent, ProfileEditorComponent, HubComponent, LoginComponent],
+  imports: [CommonModule, FormsModule, EqPanelComponent, ChatbotComponent, ImageEditorComponent, VideoEditorComponent, AudioVisualizerComponent, PianoRollComponent, NetworkingComponent, ProfileEditorComponent, HubComponent, LoginComponent],
   host: {
     '(window:mousemove)': 'onScratch($event)', '(window:touchmove)': 'onScratch($event)',
     '(window:mouseup)': 'onScratchEnd()', '(window:touchend)': 'onScratchEnd()',
@@ -70,6 +70,8 @@ export class AppComponent implements OnDestroy {
   deckA = signal<DeckState>({ ...initialDeckState });
   deckB = signal<DeckState>({ ...initialDeckState });
   crossfade = signal(0);
+  repeat = signal(false);
+  shuffle = signal(false);
   isScratchingA = signal(false);
   isScratchingB = signal(false);
   scratchRotationA = signal('');
@@ -206,7 +208,73 @@ export class AppComponent implements OnDestroy {
         url: URL.createObjectURL(file),
       }));
       this.playlist.set(newTracks);
-      if (newTracks.length > 0) this.currentTrackIndex.set(0);
+      if (newTracks.length > 0) {
+        this.currentTrackIndex.set(0);
+        // Pre-load tracks into decks
+        this.deckA.update(d => ({ ...d, track: newTracks[0] }));
+        if (newTracks.length > 1) {
+          this.deckB.update(d => ({ ...d, track: newTracks[1] }));
+        }
+      }
+    }
+  }
+
+  toggleDeckPlay(deck: 'A' | 'B'): void {
+    const deckState = deck === 'A' ? this.deckA : this.deckB;
+    const player = deck === 'A' ? this.audioPlayerARef()?.nativeElement : this.audioPlayerBRef()?.nativeElement;
+    if (!player) return;
+
+    if (player.src !== deckState().track.url) {
+      player.src = deckState().track.url;
+      player.load();
+    }
+
+    if (deckState().isPlaying) {
+      player.pause();
+    } else {
+      player.play();
+    }
+    deckState.update(d => ({ ...d, isPlaying: !d.isPlaying }));
+  }
+
+  playNextOnDeck(deck: 'A' | 'B'): void {
+    const deckState = deck === 'A' ? this.deckA : this.deckB;
+    const playlist = this.playlist();
+    if (playlist.length === 0) return;
+
+    let nextTrackIndex;
+    const currentTrackUrl = deckState().track.url;
+    const currentTrackIndex = playlist.findIndex(t => t.url === currentTrackUrl);
+
+    if (this.shuffle()) {
+      nextTrackIndex = Math.floor(Math.random() * playlist.length);
+    } else {
+      nextTrackIndex = (currentTrackIndex + 1) % playlist.length;
+    }
+
+    deckState.update(d => ({ ...d, track: playlist[nextTrackIndex], isPlaying: true }));
+    const player = deck === 'A' ? this.audioPlayerARef()?.nativeElement : this.audioPlayerBRef()?.nativeElement;
+    if (player) {
+      player.src = playlist[nextTrackIndex].url;
+      player.load();
+      player.play();
+    }
+  }
+
+  toggleRepeat(): void {
+    this.repeat.update(r => !r);
+  }
+
+  toggleShuffle(): void {
+    this.shuffle.update(s => !s);
+  }
+
+  onDeckTrackEnded(deck: 'A' | 'B'): void {
+    if (this.repeat()) {
+      this.playNextOnDeck(deck);
+    } else {
+      const deckState = deck === 'A' ? this.deckA : this.deckB;
+      deckState.update(d => ({ ...d, isPlaying: false }));
     }
   }
 
