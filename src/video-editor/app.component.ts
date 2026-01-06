@@ -11,7 +11,7 @@ import { AudioVisualizerComponent } from '../components/audio-visualizer/audio-v
 import { PianoRollComponent } from '../components/piano-roll/piano-roll.component';
 import { NetworkingComponent, ArtistProfile, MOCK_ARTISTS } from '../components/networking/networking.component';
 import { ProfileEditorComponent } from '../components/profile-editor/profile-editor.component';
-import { HubComponent } from '../../app/hub/hub';
+import { HubComponent } from '../app/hub/hub';
 import { AiService } from '../services/ai.service';
 import { AuthService } from '../services/auth.service';
 import { UserProfileBuilderComponent } from '../components/user-profile-builder/user-profile-builder.component';
