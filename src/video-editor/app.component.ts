@@ -296,7 +296,7 @@ export class AppComponent implements OnDestroy {
   playPrevious(): void {
     const playlistSize = this.playlist().length;
     if (playlistSize === 0) return;
-    this.currentTrackIndex.update(i => (i - 1 + playlistSize) % playlist.length);
+    this.currentTrackIndex.update(i => (i - 1 + playlistSize) % playlistSize);
   }
 
   onTimeUpdate(): void { this.currentTime.set(this.mainAudioPlayerRef()?.nativeElement.currentTime || 0); }
@@ -310,7 +310,7 @@ export class AppComponent implements OnDestroy {
     const newVolume = Number((event.target as HTMLInputElement).value);
     this.volume.set(newVolume);
     const audioEl = this.mainAudioPlayerRef()?.nativeElement;
-    if (audioEl) audioEl.volume = newVolume;
+    if (.audioEl) audioEl.volume = newVolume;
   }
   formatTime(seconds: number): string {
     const min = Math.floor(seconds / 60);
