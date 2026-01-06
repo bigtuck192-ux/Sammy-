@@ -1,3 +1,4 @@
+<h2>Game Hub</h2>
 <div class="game-grid">
     <div *ngFor="let game of games()" class="game-card" (click)="selectGame(game.url)">
       <img [src]="game.image" alt="{{ game.name }}" class="game-image" />

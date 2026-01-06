@@ -6,15 +6,17 @@
   }
   
   .game-card {
-    background: #1e1e1e;
+    background: var(--container-background);
     border-radius: 8px;
     overflow: hidden;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid var(--border-color);
   }
   
   .game-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 0 15px var(--primary-color);
   }
   
   .game-image {
@@ -30,5 +32,6 @@
   .game-title {
     font-size: 1.2em;
     margin: 0;
+    color: var(--primary-color);
   }
   

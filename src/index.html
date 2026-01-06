@@ -1,53 +1,8 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>Aura Music Player</title>
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" type="image/x-icon" href="favicon.ico" />
-
-  <script>
-    // --- START: Critical API_KEY sanitization for @google/genai ---
-    // This block MUST run before the importmap to guarantee the environment
-    // is clean before the browser even knows where to find @google/genai.
-    // It prepares a clean API key, preventing JSON parsing errors from the
-    // @google/genai library during its static initialization phase.
-    (function() {
-      // Ensure globalThis.process.env exists and is a mutable object.
-      let env = {};
-      try {
-        if (globalThis.process && typeof globalThis.process.env === 'object' && globalThis.process.env !== null) {
-          // Create a mutable copy to avoid issues with frozen objects.
-          env = { ...globalThis.process.env };
-        }
-      } catch (e) {
-        console.warn('Unable to access process.env', e);
-      }
-
-      // If API_KEY is present in the original process.env, sanitize it.
-      if (env.API_KEY) {
-        // Remove surrounding quotes if they exist (common in some environment injection scenarios).
-        env.API_KEY = env.API_KEY.replace(/^["']|["']$/g, '').trim();
-      }
-
-      // Expose the sanitized key globally so the Angular app can read it.
-      // This is the source of truth for the app.
-      globalThis.AURA_GEMINI_API_KEY = env.API_KEY || '';
-
-      // Create a new process object with the sanitized env.
-      // We set it on globalThis to ensure it's available globally.
-      globalThis.process = {
-        env: env
-      };
-    })();
-    // --- END: Critical API_KEY sanitization ---
-  </script>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-black text-white">
-  <app-root></app-root>
+<body style="background-color: #0d1117;">
+  <div class="container">
+    <header class="header">
+      <h1>Sammy</h1>
+    </header>
+    <app-root></app-root>
+  </div>
 </body>
-</html>
