@@ -1,0 +1,8 @@
+<div class="game-grid">
+    <div *ngFor="let game of games()" class="game-card" (click)="selectGame(game.url)">
+      <img [src]="game.image" alt="{{ game.name }}" class="game-image" />
+      <div class="game-info">
+        <h3 class="game-title">{{ game.name }}</h3>
+      </div>
+    </div>
+  </div>
