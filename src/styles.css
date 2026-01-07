@@ -22,6 +22,30 @@ body, html {
   background-size: 20px 20px;
 }
 
+/* Layout helpers to keep footer at bottom */
+app-root, .app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.app-main { flex: 1 1 auto; }
+
+/* Watermark footer styling */
+.watermark-footer {
+  font-size: 11px;
+  line-height: 1.6;
+  letter-spacing: 0.03em;
+  color: rgba(255,255,255,0.4);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 6px 10px;
+  text-align: center;
+  backdrop-filter: blur(2px);
+}
+
+@media (prefers-color-scheme: light) {
+  .watermark-footer { color: rgba(0,0,0,0.5); border-top-color: rgba(0,0,0,0.08); }
+}
+
 ::-webkit-scrollbar {
   width: 8px;
 }

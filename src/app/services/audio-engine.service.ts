@@ -32,6 +32,28 @@ export interface TrackState {
   sendB: number; // delay
 }
 
+type DeckId = 'A' | 'B';
+interface DeckChannel {
+  buffer?: AudioBuffer;
+  source?: AudioBufferSourceNode | null;
+  pre: GainNode;            // point after EQ/filter for sends
+  gain: GainNode;           // deck output gain
+  pan: StereoPannerNode;    // deck pan
+  filter: BiquadFilterNode; // LP/HP filter
+  eqLow: BiquadFilterNode;  // lowshelf
+  eqMid: BiquadFilterNode;  // peaking
+  eqHigh: BiquadFilterNode; // highshelf
+  sendA: GainNode;          // reverb send
+  sendB: GainNode;          // delay send
+  startTime: number;        // when playback started in ctx time
+  pauseOffset: number;      // seconds offset into buffer when paused
+  rate: number;             // playbackRate
+  isPlaying: boolean;
+  loopEnabled: boolean;
+  loopStartSec: number;
+  loopEndSec: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AudioEngineService {
   private ctx: AudioContext;
@@ -68,6 +90,13 @@ export class AudioEngineService {
 
   // tracks
   private tracks = new Map<number, TrackState>();
+
+  // DJ Decks and crossfader
+  private deckA!: DeckChannel;
+  private deckB!: DeckChannel;
+  private crossfader = 0; // -1 (A) to +1 (B)
+  private crossfaderCurve: 'linear' | 'power' | 'exp' | 'cut' = 'linear';
+  private crossfaderHamster = false;
 
   constructor() {
     this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -136,10 +165,233 @@ export class AudioEngineService {
 
     // basic small impulse for convolver placeholder
     this.loadDefaultImpulse();
+
+    // initialize decks
+    this.initDeck('A');
+    this.initDeck('B');
+    this.applyCrossfader();
   }
 
   getAnalyser(): AnalyserNode { return this.analyser; }
   getContext(): AudioContext { return this.ctx; }
+
+  private initDeck(id: DeckId) {
+    const pre = this.ctx.createGain();
+    const gain = this.ctx.createGain();
+    const pan = this.ctx.createStereoPanner();
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 20000;
+
+    const eqLow = this.ctx.createBiquadFilter();
+    eqLow.type = 'lowshelf';
+    eqLow.frequency.value = 120;
+    const eqMid = this.ctx.createBiquadFilter();
+    eqMid.type = 'peaking';
+    eqMid.frequency.value = 1000;
+    eqMid.Q.value = 1;
+    const eqHigh = this.ctx.createBiquadFilter();
+    eqHigh.type = 'highshelf';
+    eqHigh.frequency.value = 8000;
+
+    const sendA = this.ctx.createGain();
+    sendA.gain.value = 0;
+    const sendB = this.ctx.createGain();
+    sendB.gain.value = 0;
+
+    // Route: src -> eqLow -> eqMid -> eqHigh -> filter -> pre
+    // pre -> gain -> pan -> master
+    // pre -> sendA -> reverbConvolver
+    // pre -> sendB -> delay
+    pre.connect(gain).connect(pan).connect(this.masterGain);
+    pre.connect(sendA).connect(this.reverbConvolver);
+    pre.connect(sendB).connect(this.delay);
+
+    const deck: DeckChannel = {
+      pre, gain, pan, filter, eqLow, eqMid, eqHigh, sendA, sendB,
+      buffer: undefined, source: null, startTime: 0, pauseOffset: 0,
+      rate: 1, isPlaying: false,
+      loopEnabled: false, loopStartSec: 0, loopEndSec: 0,
+    };
+
+    // chain EQ and filter into pre
+    eqLow.connect(eqMid).connect(eqHigh).connect(filter).connect(pre);
+
+    if (id === 'A') this.deckA = deck; else this.deckB = deck;
+  }
+
+  private getDeck(id: DeckId): DeckChannel { return id === 'A' ? this.deckA : this.deckB; }
+
+  // Crossfader control
+  setCrossfader(value: number, curve: 'linear' | 'power' | 'exp' | 'cut' = this.crossfaderCurve, hamster = this.crossfaderHamster) {
+    this.crossfader = Math.max(-1, Math.min(1, value));
+    this.crossfaderCurve = curve;
+    this.crossfaderHamster = hamster;
+    this.applyCrossfader();
+  }
+
+  private applyCrossfader() {
+    let t = (this.crossfader + 1) / 2; // 0..1, 0=A,1=B
+    if (this.crossfaderHamster) t = 1 - t;
+    let gA = 1 - t;
+    let gB = t;
+    switch (this.crossfaderCurve) {
+      case 'power':
+        // equal power
+        gA = Math.cos(t * Math.PI / 2);
+        gB = Math.sin(t * Math.PI / 2);
+        break;
+      case 'exp':
+        const k = 2.2;
+        gA = Math.pow(1 - t, k);
+        gB = Math.pow(t, k);
+        break;
+      case 'cut':
+        const thr = 0.05;
+        gA = t < (0.5 - thr) ? 1 : t > 0.5 ? 0 : 0.5;
+        gB = t > (0.5 + thr) ? 1 : t < 0.5 ? 0 : 0.5;
+        break;
+      default:
+        // linear
+        gA = 1 - t; gB = t;
+    }
+    this.deckA.gain.gain.setTargetAtTime(gA, this.ctx.currentTime, 0.005);
+    this.deckB.gain.gain.setTargetAtTime(gB, this.ctx.currentTime, 0.005);
+  }
+
+  // Deck operations
+  loadDeckBuffer(id: DeckId, buffer: AudioBuffer) {
+    const deck = this.getDeck(id);
+    deck.buffer = buffer;
+    deck.pauseOffset = 0;
+    if (deck.isPlaying) {
+      this.stopDeckSource(deck);
+      this.startDeckSource(deck, 0);
+    }
+  }
+
+  playDeck(id: DeckId) {
+    const deck = this.getDeck(id);
+    if (!deck.buffer) return;
+    if (deck.isPlaying) return;
+    this.startDeckSource(deck, deck.pauseOffset);
+  }
+
+  pauseDeck(id: DeckId) {
+    const deck = this.getDeck(id);
+    if (!deck.isPlaying) return;
+    const elapsed = this.ctx.currentTime - deck.startTime;
+    deck.pauseOffset = Math.max(0, deck.pauseOffset + elapsed * deck.rate);
+    this.stopDeckSource(deck);
+  }
+
+  setDeckRate(id: DeckId, rate: number) {
+    const deck = this.getDeck(id);
+    deck.rate = Math.max(0.5, Math.min(1.5, rate));
+    if (deck.source) {
+      try { deck.source.playbackRate.setTargetAtTime(deck.rate, this.ctx.currentTime, 0.01); } catch {}
+    }
+  }
+
+  setDeckEq(id: DeckId, highs: number, mids: number, lows: number) {
+    const deck = this.getDeck(id);
+    // highs/mids/lows expected -12..+12 dB
+    deck.eqHigh.gain.setTargetAtTime(highs, this.ctx.currentTime, 0.02);
+    deck.eqMid.gain.setTargetAtTime(mids, this.ctx.currentTime, 0.02);
+    deck.eqLow.gain.setTargetAtTime(lows, this.ctx.currentTime, 0.02);
+  }
+
+  setDeckFilterFreq(id: DeckId, freq: number) {
+    const deck = this.getDeck(id);
+    deck.filter.frequency.setTargetAtTime(Math.max(20, Math.min(20000, freq)), this.ctx.currentTime, 0.02);
+  }
+
+  setDeckGain(id: DeckId, gain: number) {
+    const deck = this.getDeck(id);
+    deck.gain.gain.setTargetAtTime(Math.max(0, Math.min(1, gain)), this.ctx.currentTime, 0.01);
+  }
+
+  setDeckSends(id: DeckId, sendA: number, sendB: number) {
+    const deck = this.getDeck(id);
+    deck.sendA.gain.setTargetAtTime(Math.max(0, Math.min(1, sendA)), this.ctx.currentTime, 0.01);
+    deck.sendB.gain.setTargetAtTime(Math.max(0, Math.min(1, sendB)), this.ctx.currentTime, 0.01);
+  }
+
+  private startDeckSource(deck: DeckChannel, offset: number) {
+    if (!deck.buffer) return;
+    const src = this.ctx.createBufferSource();
+    src.buffer = deck.buffer;
+    src.playbackRate.value = deck.rate;
+    // loop settings
+    src.loop = deck.loopEnabled;
+    if (deck.loopEnabled) {
+      src.loopStart = deck.loopStartSec;
+      src.loopEnd = deck.loopEndSec > 0 ? deck.loopEndSec : (deck.buffer?.duration || 0);
+    }
+    // Rebuild the source connection into the deck chain
+    src.connect(deck.eqLow);
+
+    const duration = deck.buffer.duration;
+    const when = this.ctx.currentTime + 0.005;
+    src.start(when, offset);
+    deck.startTime = when;
+    deck.source = src;
+    deck.isPlaying = true;
+
+    src.onended = () => {
+      // handle natural end
+      if (deck.source === src) {
+        deck.isPlaying = false;
+        deck.source = null;
+        deck.pauseOffset = 0;
+      }
+    };
+  }
+
+  private stopDeckSource(deck: DeckChannel) {
+    if (deck.source) {
+      try { deck.source.stop(); } catch {}
+      deck.source.disconnect();
+      deck.source = null;
+    }
+    deck.isPlaying = false;
+  }
+
+  seekDeck(id: DeckId, seconds: number) {
+    const deck = this.getDeck(id);
+    if (!deck.buffer) return;
+    const dur = deck.buffer.duration;
+    const pos = Math.max(0, Math.min(dur - 0.001, seconds));
+    const wasPlaying = deck.isPlaying;
+    if (deck.isPlaying) this.stopDeckSource(deck);
+    deck.pauseOffset = pos;
+    if (wasPlaying) this.startDeckSource(deck, deck.pauseOffset);
+  }
+
+  setDeckLoop(id: DeckId, enabled: boolean, startSec: number, endSec: number) {
+    const deck = this.getDeck(id);
+    deck.loopEnabled = enabled;
+    deck.loopStartSec = Math.max(0, startSec);
+    deck.loopEndSec = Math.max(deck.loopStartSec + 0.01, endSec);
+    if (deck.isPlaying) {
+      // rebuild source to apply loop changes immediately
+      const wasOffset = this.getDeckProgress(id).position;
+      this.stopDeckSource(deck);
+      this.startDeckSource(deck, wasOffset);
+    }
+  }
+
+  getDeckProgress(id: DeckId): { position: number; duration: number; isPlaying: boolean } {
+    const deck = this.getDeck(id);
+    const dur = deck.buffer?.duration || 0;
+    if (!deck.buffer) return { position: 0, duration: 0, isPlaying: false };
+    let pos = deck.pauseOffset;
+    if (deck.isPlaying) {
+      const elapsed = this.ctx.currentTime - deck.startTime;
+      pos = Math.max(0, Math.min(dur, deck.pauseOffset + elapsed * deck.rate));
+    }
+    return { position: pos, duration: dur, isPlaying: deck.isPlaying };
+  }
 
   private async loadDefaultImpulse() {
     const rate = this.ctx.sampleRate;
