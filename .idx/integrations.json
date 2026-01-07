@@ -1,3 +1,5 @@
 {
-  "gemini_api": {}
+  "firebase_hosting": {},
+  "gemini_api": {},
+  "secrets_manager": {}
 }
