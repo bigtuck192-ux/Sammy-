@@ -3,7 +3,6 @@ import { Component, ChangeDetectionStrategy, signal, ElementRef, viewChild, effe
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiService } from '../services/ai.service';
-import { AuthService } from '../services/auth.service';
 // FIX: Import AppTheme and shared types from UserContextService to break circular dependency which caused injection errors.
 import { UserContextService, AppTheme, Track, EqBand, Enhancements, DeckState, initialDeckState } from '../services/user-context.service';
 import { UserProfileService } from '../services/user-profile.service';
@@ -25,7 +24,7 @@ const THEMES: AppTheme[] = [
   standalone: true,
   templateUrl: './app.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EqPanelComponent, MatrixBackgroundComponent, ChatbotComponent, ImageEditorComponent, VideoEditorComponent, AudioVisualizerComponent, PianoRollComponent, NetworkingComponent, ProfileEditorComponent, HubComponent],
   host: {
     '(window:mousemove)': 'onScratch($event)', '(window:touchmove)': 'onScratch($event)',
     '(window:mouseup)': 'onScratchEnd()', '(window:touchend)': 'onScratchEnd()',
@@ -41,7 +40,7 @@ export class AppComponent implements OnDestroy {
   videoPlayerBRef = viewChild<ElementRef<HTMLVideoElement>>('videoPlayerB');
   fileInputRef = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 
-  mainViewMode = signal<MainViewMode>('user-profile-builder');
+  mainViewMode = signal<'player' | 'dj' | 'piano-roll' | 'image-editor' | 'video-editor' | 'networking' | 'profile' | 'tha-spot'>('player');
   showChatbot = signal(true);
 
   // --- Player State ---
@@ -123,14 +122,6 @@ export class AppComponent implements OnDestroy {
 
     this.initAudioContext();
     this.initVUAnalysis();
-
-    // Effect to handle view mode changes after profile creation (or login)
-    effect(() => {
-      if (this.mainViewMode() === 'user-profile-builder' && this.authService.isAuthenticated()) {
-        this.mainViewMode.set('player');
-      }
-    }, { allowSignalWrites: true });
-
     effect(() => { if (this.imageAnalysisResult()) this.showImageAnalysisModal.set(true); });
     effect(() => { if (this.mapLocationResult()) this.showMapResultsModal.set(true); });
     effect(() => { if (this.selectedArtistProfile()) this.showArtistDetailModal.set(true); });
@@ -373,15 +364,5 @@ export class AppComponent implements OnDestroy {
       nextIndex = Math.floor(Math.random() * this.THEMES.length);
     } while (nextIndex === currentIndex);
     this.currentTheme.set(this.THEMES[nextIndex]);
-  }
-
-  // Method to handle view changes, including auth check for profile
-  setViewMode(mode: Exclude<MainViewMode, 'user-profile-builder'>): void {
-    // This method will need to be updated to handle the new flow
-    this.mainViewMode.set(mode);
-  }
-
-  handleProfileSaved(): void {
-    this.mainViewMode.set('player');
   }
 }
