@@ -1,18 +1,18 @@
 import { Component, signal, computed, effect, inject, ChangeDetectorRef, ElementRef, viewChild, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UserContextService, AppTheme } from '../services/user-context.service';
+import { UserContextService, AppTheme, MainViewMode } from '../services/user-context.service';
 import { AiService } from '../services/ai.service';
 import { EqPanelComponent } from '../components/eq-panel/eq-panel.component';
 import { MatrixBackgroundComponent } from '../components/matrix-background/matrix-background.component';
-import { ChatbotComponent } from '../components/chatbot/chatbot.component';
+import { ChatbotComponent } from '../chatbot/chatbot.component';
 import { ImageEditorComponent } from '../components/image-editor/image-editor.component';
-import { VideoEditorComponent } from '../components/video-editor/video-editor.component';
+import { VideoEditorComponent } from './video-editor.component';
 import { AudioVisualizerComponent } from '../components/audio-visualizer/audio-visualizer.component';
 import { PianoRollComponent } from '../components/piano-roll/piano-roll.component';
 import { NetworkingComponent } from '../components/networking/networking.component';
 import { ProfileEditorComponent } from '../components/profile-editor/profile-editor.component';
-import { HubComponent } from '../components/hub/hub.component';
+import { HubComponent } from '../app/hub/hub.component';
 import { AuthService } from '../services/auth.service';
 
 interface Track {
@@ -56,11 +56,11 @@ export class AppComponent implements AfterViewInit {
 
     // Theming
     readonly THEMES: AppTheme[] = [
-        { name: 'Green Vintage', primary: '#34d399', secondary: '#a7f3d0', background: '#111827', text: '#e5e7eb' },
-        { name: 'Blue Retro', primary: '#60a5fa', secondary: '#93c5fd', background: '#1e3a8a', text: '#dbeafe' },
-        { name: 'Red Glitch', primary: '#f87171', secondary: '#fca5a5', background: '#4c0519', text: '#fee2e2' },
+        { name: 'Green Vintage', primary: '#34d399', accent: '#a7f3d0', neutral: '#111827', purple: '#34d399', red: '#34d399', blue: '#34d399' },
+        { name: 'Blue Retro', primary: '#60a5fa', accent: '#93c5fd', neutral: '#1e3a8a', purple: '#60a5fa', red: '#60a5fa', blue: '#60a5fa' },
+        { name: 'Red Glitch', primary: '#f87171', accent: '#fca5a5', neutral: '#4c0519', purple: '#f87171', red: '#f87171', blue: '#f87171' },
     ];
-    currentTheme = this.userContextService.currentTheme;
+    currentTheme = this.userContextService.lastUsedTheme;
 
     // Main View Management
     mainViewMode = this.userContextService.mainViewMode;
@@ -120,12 +120,12 @@ export class AppComponent implements AfterViewInit {
     selectedArtistProfile = signal<any>(null);
 
     // Computed UI classes
-    mainBorderClass = computed(() => `border-[${this.currentTheme().primary}]`);
-    mainTextColorClass = computed(() => `text-[${this.currentTheme().primary}]`);
-    mainBgClass = computed(() => `bg-[${this.currentTheme().primary}]/80`);
-    mainHoverBgClass = computed(() => `hover:bg-[${this.currentTheme().primary}]/20`);
-    djBorderClass = computed(() => `border-[${this.currentTheme().secondary}]/50`);
-    djTextColorClass = computed(() => `text-[${this.currentTheme().secondary}]`);
+    mainBorderClass = computed(() => `border-[${this.currentTheme()?.primary}]`);
+    mainTextColorClass = computed(() => `text-[${this.currentTheme()?.primary}]`);
+    mainBgClass = computed(() => `bg-[${this.currentTheme()?.primary}]/80`);
+    mainHoverBgClass = computed(() => `hover:bg-[${this.currentTheme()?.primary}]/20`);
+    djBorderClass = computed(() => `border-[${this.currentTheme()?.accent}]/50`);
+    djTextColorClass = computed(() => `text-[${this.currentTheme()?.accent}]`);
 
     // Master EQ Settings
     eqSettings = signal<number[]>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
@@ -335,7 +335,7 @@ export class AppComponent implements AfterViewInit {
         const modes = ['player', 'dj', 'piano-roll', 'image-editor', 'video-editor', 'networking', 'tha-spot'];
         const currentIndex = modes.indexOf(this.mainViewMode());
         const nextIndex = (currentIndex + 1) % modes.length;
-        this.mainViewMode.set(modes[nextIndex]);
+        this.userContextService.setMainViewMode(modes[nextIndex] as MainViewMode);
     }
 
     toggleEqPanel(): void {
@@ -363,7 +363,7 @@ export class AppComponent implements AfterViewInit {
 
     handleImageGenerated(imageUrl: string): void {
         this.userContextService.setLastImageUrl(imageUrl);
-        this.mainViewMode.set('player');
+        this.userContextService.setMainViewMode('player');
     }
     
     handleImageSelectedForAlbumArt(imageUrl: string): void {
@@ -389,12 +389,13 @@ export class AppComponent implements AfterViewInit {
       }
     
       randomizeTheme(): void {
-        const currentIndex = this.THEMES.indexOf(this.currentTheme());
+        const currentTheme = this.currentTheme();
+        const currentIndex = this.THEMES.findIndex(t => t.name === currentTheme?.name);
         let nextIndex;
         do {
           nextIndex = Math.floor(Math.random() * this.THEMES.length);
         } while (nextIndex === currentIndex);
-        this.currentTheme.set(this.THEMES[nextIndex]);
+        this.userContextService.setTheme(this.THEMES[nextIndex]);
       }
 
     // --- Utility Methods ---
