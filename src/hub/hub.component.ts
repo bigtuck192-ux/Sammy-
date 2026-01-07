@@ -3,17 +3,22 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GameService } from './game.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { ChatbotComponent } from '../app/components/chatbot/chatbot.component';
+import { ProfileComponent } from './profile/profile.component';
 
 @Component({
   selector: 'app-hub',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ChatbotComponent, ProfileComponent],
   templateUrl: './hub.component.html',
   styleUrls: ['./hub.component.css']
 })
 export class HubComponent {
   games = this.gameService.games;
   selectedGameUrl: SafeResourceUrl | null = null;
+
+  showChat = false;
+  showProfile = false;
 
   // UI filter state
   query = signal('');

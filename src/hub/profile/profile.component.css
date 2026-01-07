@@ -1,0 +1,27 @@
+.profile-shell { display:flex; flex-direction:column; gap:12px; }
+.banner { position:relative; height: 180px; border:1px solid var(--border-color); border-radius: 10px; background-size:cover; background-position:center; overflow:hidden; }
+.banner .overlay { position:absolute; inset:0; background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6)); }
+.avatar { position:absolute; bottom: 12px; left: 12px; width:80px; height:80px; border-radius:999px; border:2px solid var(--border-color); object-fit:cover; }
+.id { position:absolute; left: 110px; bottom: 16px; color: var(--text-color); }
+.bio { opacity:0.9; cursor:text; }
+.bio-edit { display:flex; gap:6px; }
+.bio-edit textarea { min-width: 320px; min-height: 60px; background: rgba(255,255,255,0.06); border:1px solid var(--border-color); color: var(--text-color); border-radius:6px; padding:6px; }
+.tags { display:flex; gap:6px; margin-top:6px; }
+.tag { font-size:11px; padding:2px 6px; border-radius:999px; border:1px solid var(--border-color); background: rgba(255,255,255,0.04); }
+
+.stats { display:grid; grid-template-columns: repeat(5, 1fr); gap:8px; }
+.stats > div { background: var(--container-background); border:1px solid var(--border-color); border-radius:10px; padding:8px; text-align:center; }
+.stats strong { display:block; font-size: 1rem; }
+.stats span { font-size: 11px; opacity:0.8; }
+
+.new-showcase { background: var(--container-background); border:1px solid var(--border-color); border-radius:10px; padding:10px; }
+.new-showcase .row { display:grid; grid-template-columns: 120px 1fr 1fr 1fr 140px 100px; gap:8px; }
+.new-showcase input, .new-showcase select { background: rgba(255,255,255,0.06); border:1px solid var(--border-color); color: var(--text-color); border-radius:6px; padding:6px; }
+
+.showcases { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:12px; }
+.card { background: var(--container-background); border:1px solid var(--border-color); border-radius:10px; overflow:hidden; }
+.card img { width:100%; height:140px; object-fit:cover; }
+.card .info { padding:8px; display:flex; justify-content:space-between; align-items:center; }
+.card .info h5 { margin:0; font-size: 0.95rem; }
+.card .info .type { font-size: 11px; opacity: 0.8; }
+.card .info .price { font-size: 12px; color: #5df2c2; }

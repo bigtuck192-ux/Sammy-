@@ -1,0 +1,54 @@
+<div class="profile-shell">
+  <div class="banner" [style.backgroundImage]="'url(' + prof().bannerUrl + ')'">
+    <div class="overlay"></div>
+    <img class="avatar" [src]="prof().avatarUrl" alt="avatar"/>
+    <div class="id">
+      <h3>@{{ prof().handle }}</h3>
+      <p *ngIf="!editBio" class="bio" (click)="editBio=true">{{ prof().bio || 'Add a short bio...' }}</p>
+      <div *ngIf="editBio" class="bio-edit">
+        <textarea [(ngModel)]="prof().bio"></textarea>
+        <button (click)="saveBio()">Save</button>
+      </div>
+      <div class="tags">
+        <span *ngFor="let t of (prof().tags||[])" class="tag">{{ t }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div><strong>{{ prof().stats.matchesPlayed }}</strong><span>Matches</span></div>
+    <div><strong>{{ prof().stats.wins }}</strong><span>Wins</span></div>
+    <div><strong>{{ prof().stats.followers }}</strong><span>Followers</span></div>
+    <div><strong>{{ prof().stats.following }}</strong><span>Following</span></div>
+    <div><strong>{{ prof().stats.rank }}</strong><span>Rank</span></div>
+  </div>
+
+  <div class="new-showcase">
+    <h4>Add Showcase</h4>
+    <div class="row">
+      <select [(ngModel)]="newShowcase.type">
+        <option value="music">Music</option>
+        <option value="video">Video</option>
+        <option value="project">Project</option>
+        <option value="merch">Merch</option>
+      </select>
+      <input placeholder="Title" [(ngModel)]="newShowcase.title" />
+      <input placeholder="URL" [(ngModel)]="newShowcase.url" />
+      <input placeholder="Image URL" [(ngModel)]="newShowcase.image" />
+      <input placeholder="Price (for merch)" [(ngModel)]="newShowcase.price" />
+      <button (click)="addShowcase()">Add</button>
+    </div>
+  </div>
+
+  <div class="showcases">
+    <div *ngFor="let s of prof().showcases" class="card">
+      <img *ngIf="s.image" [src]="s.image" alt="{{s.title}}" />
+      <div class="info">
+        <h5>{{ s.title }}</h5>
+        <p class="type">{{ s.type }}</p>
+        <a *ngIf="s.url" [href]="s.url" target="_blank">Open</a>
+        <span *ngIf="s.price" class="price">{{ s.price }}</span>
+      </div>
+    </div>
+  </div>
+</div>

@@ -47,6 +47,11 @@
 .player .close { align-self:flex-end; margin:8px; padding:6px 10px; font-size:12px; border-radius:6px; border:1px solid var(--border-color); background: rgba(255,255,255,0.06); color: var(--text-color); }
 .player iframe { flex:1; width:100%; border:0; }
 
+/* Overlays */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index: 60; }
+.overlay .overlay-content { width: min(1000px, 90vw); max-height: 80vh; overflow:auto; background: rgba(0,0,0,0.9); border:1px solid var(--border-color); border-radius: 12px; padding: 12px; }
+.overlay .close { float:right; margin-bottom:8px; padding:6px 10px; font-size:12px; border-radius:6px; border:1px solid var(--border-color); background: rgba(255,255,255,0.06); color: var(--text-color); }
+
 @media (max-width: 1100px) {
   .hub-content { grid-template-columns: 1fr; }
   .activity { order: 3; }

@@ -6,6 +6,8 @@
       <span class="divider">|</span>
       <button class="action">Create Duel</button>
       <button class="action">Create Team</button>
+      <button class="action" (click)="showProfile = !showProfile">My Profile</button>
+      <button class="action" (click)="showChat = !showChat">Chat</button>
     </div>
   </header>
 
@@ -72,11 +74,21 @@
         <li>Chess: duel invite pending</li>
         <li>Rhythm Rumble: tournament starting</li>
       </ul>
+      <div class="chatbot" *ngIf="showChat">
+        <app-chatbot [theme]="{name:'dj',primary:'#00e5ff',accent:'#ff3ec8',neutral:'#0b0e14',purple:'#7a5cff',red:'#ff4d4d',blue:'#00e5ff'}" [mainViewMode]="'tha-spot' as any"></app-chatbot>
+      </div>
     </aside>
   </div>
 
   <div class="player" *ngIf="selectedGameUrl">
     <button class="close" (click)="closeGame()">Close</button>
     <iframe [src]="selectedGameUrl" frameborder="0"></iframe>
+  </div>
+
+  <div class="overlay" *ngIf="showProfile">
+    <div class="overlay-content">
+      <button class="close" (click)="showProfile=false">Close</button>
+      <hub-profile></hub-profile>
+    </div>
   </div>
 </div>
