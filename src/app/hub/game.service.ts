@@ -15,7 +15,8 @@ export class GameService {
  games = signal<Game[]>([...this.defaultGames]);
 
  addGame(game: Omit<Game, 'id'>) {
-   const newGame = { ...game, id: this.games().length + 1 };
+   const newId = this.games().length > 0 ? Math.max(...this.games().map(g => g.id)) + 1 : 1;
+   const newGame = { ...game, id: newId };
    this.games.update(games => [...games, newGame]);
  }
 }
