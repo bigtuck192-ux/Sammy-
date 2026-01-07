@@ -84,6 +84,10 @@ export class AppComponent implements AfterViewInit {
         return playlist[this.currentTrackIndex()];
     });
 
+    // Performance Optimization: Memoize time formatting to prevent re-calculation on every render cycle.
+    formattedCurrentTime = computed(() => this.formatTime(this.currentTime()));
+    formattedDuration = computed(() => this.formatTime(this.duration()));
+
     // DJ Decks State
     deckA = signal<DeckState>({ track: null, isPlaying: false, volume: 1 });
     deckB = signal<DeckState>({ track: null, isPlaying: false, volume: 1 });
