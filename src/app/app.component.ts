@@ -380,7 +380,7 @@ export class AppComponent implements AfterViewInit {
           track.albumArtUrl = imageUrl;
           this.playlist.update(list => [...list]); // Trigger change detection
         } else if (target === 'A') {
-          this.deckA.update(d => ({ ...d, track: { ...d.track, albumArtUrl: imageUrl } }));
+          this.deckA.update(d => ({ ...d, track: d.track ? { ...d.track, albumArtUrl: imageUrl } : null }));
         } else if (target === 'B') {
           this.deckB.update(d => ({ ...d, track: { ...d.track, albumArtUrl: imageUrl } }));
         }
