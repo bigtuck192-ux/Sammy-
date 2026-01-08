@@ -1,94 +1,95 @@
-<div class="hub-shell">
+
+<div class="hub-container">
+  <!-- Header -->
   <header class="hub-header">
-    <div class="brand">Tha Spot</div>
-    <div class="status">
-      <span class="pill">Online</span>
-      <span class="divider">|</span>
-      <button class="action">Create Duel</button>
-      <button class="action">Create Team</button>
-      <button class="action" (click)="showProfile = !showProfile">My Profile</button>
-      <button class="action" (click)="showChat = !showChat">Chat</button>
+    <div class="logo">
+      <img src="assets/tha-spot-logo.png" alt="Tha Spot">
+      <span>Tha Spot</span>
+    </div>
+    <div class="hub-actions">
+      <button class="action-btn">Friends</button>
+      <button class="action-btn">Leaderboards</button>
+      <div class="user-profile">
+        <img src="https://i.pravatar.cc/40?u=a042581f4e29026704d" alt="User Avatar">
+        <span>Smuve</span>
+      </div>
     </div>
   </header>
 
-  <div class="hub-content">
-    <aside class="filters">
+  <!-- Main Content -->
+  <div class="hub-body">
+    <!-- Left Panel: Filters -->
+    <aside class="left-panel">
+      <h3>Filters</h3>
       <div class="filter-group">
-        <label>Search</label>
-        <input placeholder="Find a game..." [(ngModel)]="query()" (ngModelChange)="query.set($event)" />
+        <label for="search">Search</label>
+        <input type="text" id="search" placeholder="Game name..." [(ngModel)]="filterQuery" (ngModelChange)="applyFilters()">
       </div>
       <div class="filter-group">
-        <label>Genre</label>
-        <select [(ngModel)]="genre()" (ngModelChange)="genre.set($event)">
-          <option>All</option>
+        <label for="genre">Genre</label>
+        <select id="genre" [(ngModel)]="filterGenre" (ngModelChange)="applyFilters()">
+          <option value="">All</option>
           <option>Shooter</option>
           <option>Racing</option>
           <option>Strategy</option>
-          <option>Arena</option>
-          <option>Runner</option>
+          <option>Arcade</option>
           <option>Puzzle</option>
-          <option>Rhythm</option>
         </select>
       </div>
-      <div class="filter-group">
-        <label>Sort</label>
-        <select [(ngModel)]="sort()" (ngModelChange)="sort.set($event)">
-          <option>Trending</option>
+       <div class="filter-group">
+        <label for="sort">Sort By</label>
+        <select id="sort" [(ngModel)]="filterSort" (ngModelChange)="applyFilters()">
           <option>Popular</option>
-          <option>Newest</option>
           <option>Rating</option>
+          <option>Newest</option>
         </select>
       </div>
     </aside>
 
-    <section class="game-grid">
-      <div *ngFor="let game of filteredGames()" class="game-card" (click)="selectGame(game.url)">
-        <div class="media">
-          <img [src]="game.image" alt="{{ game.name }}" class="game-image" />
-          <video *ngIf="game.previewVideo" class="game-preview" [src]="game.previewVideo" muted loop playsinline></video>
-        </div>
-        <div class="game-info">
-          <div class="top">
-            <h3 class="game-title">{{ game.name }}</h3>
-            <div class="meta">
-              <span class="rating" *ngIf="game.rating">★ {{ game.rating | number:'1.1-1' }}</span>
-              <span class="players" *ngIf="game.playersOnline">● {{ game.playersOnline }}</span>
+    <!-- Center Panel: Game Grid -->
+    <main class="center-panel">
+      <div class="game-grid">
+        <div class="game-card" *ngFor="let game of filteredGames()" 
+             (mouseenter)="hoveredGame.set(game)" (mouseleave)="hoveredGame.set(null)">
+          <div class="card-media">
+            <video *ngIf="hoveredGame() === game && game.previewVideo" [src]="game.previewVideo" autoplay muted loop class="preview-video"></video>
+            <img *ngIf="hoveredGame() !== game || !game.previewVideo" [src]="game.image" [alt]="game.name" class="cover-image">
+          </div>
+          <div class="card-body">
+            <h4 class="title">{{ game.name }}</h4>
+            <div class="metadata">
+              <span class="tag" *ngFor="let tag of game.tags">{{ tag }}</span>
+              <span class="rating">{{ game.rating }} ★</span>
+              <span class="players">{{ game.playersOnline }} playing</span>
             </div>
           </div>
-          <div class="tags" *ngIf="game.tags?.length">
-            <span class="tag" *ngFor="let t of game.tags">{{ t }}</span>
-          </div>
-          <div class="actions">
-            <button class="play">Play</button>
-            <button class="challenge" *ngIf="game.modes?.includes('duel')">Challenge</button>
-            <button class="team" *ngIf="game.modes?.includes('team')">Team</button>
+           <div class="card-actions">
+            <button class="play-btn" (click)="playGame(game)">Play</button>
+            <button class="action-btn" *ngIf="game.modes?.includes('duel')">Duel</button>
+            <button class="action-btn" *ngIf="game.modes?.includes('team')">Team Up</button>
           </div>
         </div>
       </div>
-    </section>
+    </main>
 
-    <aside class="activity">
-      <h4>Live Activity</h4>
-      <ul>
-        <li>Neon Arena: 2v2 forming...</li>
-        <li>Chess: duel invite pending</li>
-        <li>Rhythm Rumble: tournament starting</li>
-      </ul>
-      <div class="chatbot" *ngIf="showChat">
-        <app-chatbot [theme]="{name:'dj',primary:'#00e5ff',accent:'#ff3ec8',neutral:'#0b0e14',purple:'#7a5cff',red:'#ff4d4d',blue:'#00e5ff'}" [mainViewMode]="'tha-spot' as any"></app-chatbot>
+    <!-- Right Panel: Activity Feed -->
+    <aside class="right-panel">
+      <h3>Activity Feed</h3>
+      <div class="feed-item" *ngFor="let item of activityFeed()">
+        <p [innerHTML]="item"></p>
+        <span class="timestamp">
+          {{ item.includes('duel') ? '5m ago' : (item.includes('recruiting') ? '12m ago' : (item.includes('online') ? '1h ago' : '3h ago')) }}
+        </span>
       </div>
     </aside>
   </div>
-
-  <div class="player" *ngIf="selectedGameUrl">
-    <button class="close" (click)="closeGame()">Close</button>
-    <iframe [src]="selectedGameUrl" frameborder="0"></iframe>
-  </div>
-
-  <div class="overlay" *ngIf="showProfile">
-    <div class="overlay-content">
-      <button class="close" (click)="showProfile=false">Close</button>
-      <hub-profile></hub-profile>
+  
+  <!-- Game Player Overlay -->
+  <div class="game-player-overlay" *ngIf="activeGame()">
+    <div class="player-header">
+      <h3>{{ activeGame()?.name }}</h3>
+      <button class="close-btn" (click)="closeGame()">×</button>
     </div>
+    <iframe [src]="activeGameUrl()" frameborder="0" allowfullscreen></iframe>
   </div>
 </div>

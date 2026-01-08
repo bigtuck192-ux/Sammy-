@@ -1,4 +1,5 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Game } from './game';
 import { GameService } from './game.service';
 
@@ -8,34 +9,79 @@ import { GameService } from './game.service';
   styleUrls: ['./hub.css']
 })
 export class HubComponent implements OnInit {
-  games = signal<Game[]>([]);
+  // Signals for state management
+  allGames = signal<Game[]>([]);
+  filteredGames = computed(() => {
+    const query = this.filterQuery().toLowerCase();
+    const genre = this.filterGenre();
+    const sort = this.filterSort();
+    
+    let games = this.allGames().filter(g => 
+      g.name.toLowerCase().includes(query) && 
+      (genre ? g.genre === genre : true)
+    );
+
+    switch (sort) {
+      case 'Popular':
+        games.sort((a, b) => (b.playersOnline || 0) - (a.playersOnline || 0));
+        break;
+      case 'Rating':
+        games.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      case 'Newest':
+        games.sort((a, b) => b.id - a.id);
+        break;
+    }
+    
+    return games;
+  });
+
   activityFeed = signal<string[]>([]);
-  
-  constructor(private gameService: GameService) {}
+  hoveredGame = signal<Game | null>(null);
+  activeGame = signal<Game | null>(null);
+  activeGameUrl = computed(() => {
+    const game = this.activeGame();
+    return game ? this.sanitizer.bypassSecurityTrustResourceUrl(game.url) : null;
+  });
+
+  // Filter and sort states
+  filterQuery = signal('');
+  filterGenre = signal('');
+  filterSort = signal<'Popular' | 'Rating' | 'Newest'>('Popular');
+
+  constructor(private gameService: GameService, private sanitizer: DomSanitizer) {}
 
   ngOnInit() {
-    this.loadGames();
+    this.loadInitialData();
     this.setupActivityFeed();
   }
 
-  loadGames(filters = {}, sort = 'Popular') {
-    this.gameService.listGames(filters, sort as any).subscribe(games => {
-      this.games.set(games);
+  loadInitialData() {
+    this.gameService.listGames({}, 'Popular').subscribe(games => {
+      this.allGames.set(games);
     });
   }
-
-  onSearch(event: { query: string; filters: any }) {
-    const { query, filters } = event;
-    this.loadGames({ ...filters, query });
+  
+  applyFilters() {
+    // The computed signal `filteredGames` will automatically recalculate.
   }
 
   setupActivityFeed() {
-    // Mock activity feed
     this.activityFeed.set([
-      "Player 'N00bM4ster' challenged 'xX_Slayer_Xx' to a duel in Neon Arena.",
-      "Team 'Vortex' is recruiting skilled players for Rhythm Rumble.",
-      "Your friend 'CyberGamer' just came online.",
-      "A new high score has been set in Grid Runner!",
+      "Player <strong>N00bM4ster</strong> challenged <strong>xX_Slayer_Xx</strong> to a duel in <em>Neon Arena</em>.",
+      "Team <strong>Vortex</strong> is recruiting skilled players for <em>Rhythm Rumble</em>.",
+      "Your friend <strong>CyberGamer</strong> just came online.",
+      "A new high score has been set in <em>Grid Runner</em>!",
     ]);
+  }
+
+  playGame(game: Game) {
+    if (game.url) {
+      this.activeGame.set(game);
+    }
+  }
+
+  closeGame() {
+    this.activeGame.set(null);
   }
 }
