@@ -1,28 +1,25 @@
-import { Component, EventEmitter, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { GameService } from '../game.service';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { Game } from '../game';
 
 @Component({
   selector: 'app-game-list',
-  standalone: true,
-  imports: [CommonModule],
   templateUrl: './game-list.component.html',
-  styleUrls: ['./game-list.component.css']
+  styleUrls: ['../hub.css'], // Reusing hub styles for cards
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GameListComponent {
-  @Output() gameSelected = new EventEmitter<Game>();
-  @Output() findMoreGames = new EventEmitter<void>();
+  @Input() games: Game[] = [];
 
-  games = this.gameService.games;
-
-  constructor(private gameService: GameService) {}
-
-  selectGame(game: Game) {
-    this.gameSelected.emit(game);
-  }
-
-  onFindMoreGames() {
-    this.findMoreGames.emit();
+  playPreview(event: MouseEvent, play: boolean) {
+    const card = (event.currentTarget as HTMLElement);
+    const video = card.querySelector('.preview-video') as HTMLVideoElement;
+    if (video) {
+      if (play) {
+        video.play().catch(e => console.error("Video autoplay failed", e));
+      } else {
+        video.pause();
+        video.currentTime = 0;
+      }
+    }
   }
 }

@@ -1,37 +1,23 @@
-import { Component, EventEmitter, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { GameService } from '../game.service';
+import { Component, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 
 @Component({
   selector: 'app-game-search',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
   templateUrl: './game-search.component.html',
-  styleUrls: ['./game-search.component.css']
+  styleUrls: ['../hub.css'] // Reusing hub styles
 })
 export class GameSearchComponent {
-  @Output() gameInstalled = new EventEmitter<void>();
-  @Output() backToList = new EventEmitter<void>();
+  @Output() searchChange = new EventEmitter<{ query: string; filters: any; }>();
 
-  gameName = '';
-  gameUrl = '';
-  gameImage = '';
+  @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('genreSelect') genreSelect!: ElementRef<HTMLSelectElement>;
+  @ViewChild('sortSelect') sortSelect!: ElementRef<HTMLSelectElement>;
 
-  constructor(private gameService: GameService) {}
-
-  installGame() {
-    if (this.gameName && this.gameUrl) {
-      this.gameService.addGame({
-        name: this.gameName,
-        url: this.gameUrl,
-        image: this.gameImage
-      });
-      this.gameInstalled.emit();
-    }
-  }
-
-  onBackToList() {
-    this.backToList.emit();
+  onSearchChange() {
+    const query = this.searchInput.nativeElement.value;
+    const filters = {
+      genre: this.genreSelect.nativeElement.value,
+      sort: this.sortSelect.nativeElement.value
+    };
+    this.searchChange.emit({ query, filters });
   }
 }

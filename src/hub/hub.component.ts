@@ -1,71 +1,41 @@
-import { Component, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, signal } from '@angular/core';
+import { Game } from './game';
 import { GameService } from './game.service';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { ChatbotComponent } from '../app/components/chatbot/chatbot.component';
-import { ProfileComponent } from './profile/profile.component';
 
 @Component({
   selector: 'app-hub',
-  standalone: true,
-  imports: [CommonModule, FormsModule, ChatbotComponent, ProfileComponent],
-  templateUrl: './hub.component.html',
-  styleUrls: ['./hub.component.css']
+  templateUrl: './hub.html',
+  styleUrls: ['./hub.css']
 })
-export class HubComponent {
-  games = this.gameService.games;
-  selectedGameUrl: SafeResourceUrl | null = null;
+export class HubComponent implements OnInit {
+  games = signal<Game[]>([]);
+  activityFeed = signal<string[]>([]);
+  
+  constructor(private gameService: GameService) {}
 
-  showChat = false;
-  showProfile = false;
-
-  // UI filter state
-  query = signal('');
-  genre = signal('All');
-  sort = signal('Trending');
-
-  filteredGames = computed(() => {
-    const q = this.query().toLowerCase().trim();
-    const g = this.genre();
-    const s = this.sort();
-    let list = [...this.games()];
-
-    if (g && g !== 'All') {
-      list = list.filter(x => (x.genre || '').toLowerCase() === g.toLowerCase());
-    }
-    if (q) {
-      list = list.filter(x =>
-        x.name.toLowerCase().includes(q) ||
-        (x.tags || []).some(t => t.toLowerCase().includes(q)) ||
-        (x.genre || '').toLowerCase().includes(q)
-      );
-    }
-
-    switch (s) {
-      case 'Popular':
-        list.sort((a,b) => (b.playersOnline||0) - (a.playersOnline||0));
-        break;
-      case 'Newest':
-        list.sort((a,b) => (b.id||0) - (a.id||0));
-        break;
-      case 'Rating':
-        list.sort((a,b) => (b.rating||0) - (a.rating||0));
-        break;
-      default: // Trending (approx by playersOnline + rating weight)
-        list.sort((a,b) => ((b.playersOnline||0)*1.0 + (b.rating||0)*20) - ((a.playersOnline||0)*1.0 + (a.rating||0)*20));
-    }
-
-    return list;
-  });
-
-  constructor(private gameService: GameService, private sanitizer: DomSanitizer) {}
-
-  selectGame(url: string) {
-    this.selectedGameUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  ngOnInit() {
+    this.loadGames();
+    this.setupActivityFeed();
   }
 
-  closeGame() {
-    this.selectedGameUrl = null;
+  loadGames(filters = {}, sort = 'Popular') {
+    this.gameService.listGames(filters, sort as any).subscribe(games => {
+      this.games.set(games);
+    });
+  }
+
+  onSearch(event: { query: string; filters: any }) {
+    const { query, filters } = event;
+    this.loadGames({ ...filters, query });
+  }
+
+  setupActivityFeed() {
+    // Mock activity feed
+    this.activityFeed.set([
+      "Player 'N00bM4ster' challenged 'xX_Slayer_Xx' to a duel in Neon Arena.",
+      "Team 'Vortex' is recruiting skilled players for Rhythm Rumble.",
+      "Your friend 'CyberGamer' just came online.",
+      "A new high score has been set in Grid Runner!",
+    ]);
   }
 }

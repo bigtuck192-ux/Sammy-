@@ -1,18 +1,38 @@
 <div class="hub-container">
-  @switch (viewMode()) {
-    @case ('list') {
-      <app-game-list (gameSelected)="onGameSelected($event)" (findMoreGames)="onFindMoreGames()"></app-game-list>
-    }
-    @case ('game') {
-      <div class="w-full h-[80vh] border-2 border-green-400/50">
-        @if (safeGameUrl) {
-          <iframe [src]="safeGameUrl" class="w-full h-full"></iframe>
-        }
+  <header class="hub-header">
+    <div class="branding">THA SPOT</div>
+    <div class="hub-status">
+      <span>Ping: 62ms</span>
+      <span>US-EAST</span>
+    </div>
+    <div class="user-profile">
+      <span>User</span>
+      <div class="party-status">Solo</div>
+    </div>
+  </header>
+
+  <div class="hub-body">
+    <aside class="left-sidebar">
+      <div class="actions-box">
+        <button class="action-button primary">Create Duel</button>
+        <button class="action-button secondary">Create Team</button>
       </div>
-      <button (click)="onBackToList()" class="mt-4 p-2 border w-full">[ BACK TO GAME LIST ]</button>
-    }
-    @case ('search') {
-      <app-game-search (gameInstalled)="onGameInstalled()" (backToList)="onBackToList()"></app-game-search>
-    }
-  }
+      <app-game-search (searchChange)="onSearch($event)"></app-game-search>
+    </aside>
+
+    <main class="main-content">
+      <app-game-list [games]="games()"></app-game-list>
+    </main>
+
+    <aside class="right-sidebar">
+      <div class="activity-feed">
+        <h4>Live Activity</h4>
+        <ul>
+          <li>Player 'X' challenged 'Y' to a duel.</li>
+          <li>Team 'Alpha' is looking for players.</li>
+          <li>Friend 'Z' is now online.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
 </div>
