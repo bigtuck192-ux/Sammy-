@@ -19,6 +19,10 @@ export class HubComponent implements OnInit {
     return game ? this.sanitizer.bypassSecurityTrustResourceUrl(game.url) : null;
   });
 
+  // Modal visibility signals
+  isDuelModalVisible = signal(false);
+  isTeamModalVisible = signal(false);
+
   // Filter and sort states
   filterQuery = signal('');
   filterGenre = signal('');
@@ -66,5 +70,14 @@ export class HubComponent implements OnInit {
 
   closeGame() {
     this.activeGame.set(null);
+  }
+
+  // Modal control methods
+  openDuelModal() {
+    this.isDuelModalVisible.set(true);
+  }
+
+  openTeamModal() {
+    this.isTeamModalVisible.set(true);
   }
 }

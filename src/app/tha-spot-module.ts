@@ -5,13 +5,15 @@ import { GameListComponent } from './game-list/game-list.component';
 import { GameSearchComponent } from './game-search/game-search.component';
 import { GameService } from './game.service';
 import { LobbyComponent } from './lobby/lobby.component';
+import { ModalComponent } from '../hub/modal.component';
 
 @NgModule({
   declarations: [
     HubComponent,
     GameListComponent,
     GameSearchComponent,
-    LobbyComponent
+    LobbyComponent,
+    ModalComponent
   ],
   imports: [
     CommonModule

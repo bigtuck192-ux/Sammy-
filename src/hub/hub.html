@@ -14,25 +14,33 @@
   <div class="hub-body">
     <aside class="left-sidebar">
       <div class="actions-box">
-        <button class="action-button primary">Create Duel</button>
-        <button class="action-button secondary">Create Team</button>
+        <button class="action-button primary" (click)="openDuelModal()">Create Duel</button>
+        <button class="action-button secondary" (click)="openTeamModal()">Create Team</button>
       </div>
       <app-game-search (searchChange)="onSearch($event)"></app-game-search>
     </aside>
 
     <main class="main-content">
-      <app-game-list [games]="games()"></app-game-list>
+      <app-game-list [games]="filteredGames()"></app-game-list>
     </main>
 
     <aside class="right-sidebar">
       <div class="activity-feed">
         <h4>Live Activity</h4>
         <ul>
-          <li>Player 'X' challenged 'Y' to a duel.</li>
-          <li>Team 'Alpha' is looking for players.</li>
-          <li>Friend 'Z' is now online.</li>
+          <li *ngFor="let activity of activityFeed()" [innerHTML]="activity"></li>
         </ul>
       </div>
     </aside>
   </div>
 </div>
+
+<app-modal title="Create a Duel" [(visible)]="isDuelModalVisible">
+  <p>Challenge another player to a 1v1 match.</p>
+  <!-- Add duel creation form here -->
+</app-modal>
+
+<app-modal title="Create a Team" [(visible)]="isTeamModalVisible">
+  <p>Form a team and compete together.</p>
+  <!-- Add team creation form here -->
+</app-modal>
